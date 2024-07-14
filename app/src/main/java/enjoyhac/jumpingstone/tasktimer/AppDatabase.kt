@@ -16,7 +16,7 @@ private const val TAG = "AppDatabase"
 private const val DATABASE_NAME = "TaskTimer.db"
 private const val DATABASE_VERSION = 1
 
-internal class AppDatabase constructor(context: Context): SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+internal class AppDatabase private constructor(context: Context): SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     init {
         Log.d(TAG, "AppDatabase: 初期化しています。。")
     }
@@ -37,4 +37,6 @@ internal class AppDatabase constructor(context: Context): SQLiteOpenHelper(conte
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         // TODO("Not yet implemented")
     }
+
+    companion object : SingletonHolder<AppDatabase, Context>(::AppDatabase)
 }
