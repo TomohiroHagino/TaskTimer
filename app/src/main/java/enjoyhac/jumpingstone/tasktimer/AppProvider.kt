@@ -16,7 +16,7 @@ import android.util.Log
 
 private const val TAG = "AppProvider"
 
-private const val CONTENT_AUTHORITY = "enjoyhac.jumpingstone.tasktimer.provider"
+const val CONTENT_AUTHORITY = "enjoyhac.jumpingstone.tasktimer.provider"
 
 private const val TASKS = 100
 private const val TASKS_ID = 101
@@ -52,7 +52,7 @@ class AppProvider: ContentProvider() {
     }
 
     override fun onCreate(): Boolean {
-        Log.d("onCreate: starts")
+        Log.d(TAG,"onCreate: starts")
         return true
     }
 
@@ -68,7 +68,7 @@ class AppProvider: ContentProvider() {
         sortOrder: String?
     ): Cursor? {
         val match = uriMatcher.match(uri)
-        Log.d("query called with uri: $match")
+        Log.d(TAG,"query called with uri: $match")
 
         val queryBuilder: SQLiteQueryBuilder = SQLiteQueryBuilder()
 
@@ -78,7 +78,7 @@ class AppProvider: ContentProvider() {
             TASKS_ID -> {
                 queryBuilder.tables = TasksContract.TABLE_NAME
                 val taskId = TasksContract.getId(uri)
-                queryBuilder.appendWhere("${TasksContract.Columns.ID} = $taskId" )
+                queryBuilder.appendWhereEscapeString("${TasksContract.Columns.ID} = $taskId" )
 
             }
 
@@ -102,15 +102,25 @@ class AppProvider: ContentProvider() {
 
             else -> throw IllegalArgumentException("Unknown URI: $uri")
         }
+
+        val db = AppDatabase.getInstance(context!!).readableDatabase
+        val cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder)
+        Log.d(TAG,"query: rows in returned cursor = ${cursor.count}")
+
+        return cursor
     }
 
-    override fun insert(uri: Uri, values: ContentValues): Uri {
+    // ContentValuesがNullableだからオプショナルにしないとだめだった
+    override fun insert(uri: Uri, values: ContentValues?): Uri {
+        val match = uriMatcher.match(uri)
+        Log.d(TAG,"onUpdate: $match")
         TODO("Not yet implemented")
     }
 
+    // ContentValuesがNullableだからオプショナルにしないとだめだった
     override fun update(
         uri: Uri,
-        values: ContentValues,
+        values: ContentValues?,
         selection: String?,
         selectionArgs: Array<out String>?
     ): Int {
@@ -120,7 +130,4 @@ class AppProvider: ContentProvider() {
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int {
         TODO("Not yet implemented")
     }
-
-
-
 }
