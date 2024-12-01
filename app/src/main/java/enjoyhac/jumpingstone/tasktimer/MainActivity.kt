@@ -4,8 +4,11 @@ import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+
+private const val TAG = "MainActivity"
 
 class MainActivity : AppCompatActivity() {
 
@@ -13,6 +16,26 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
+
+        var appDatabase = AppDatabase.getInstance(this)
+        val db = appDatabase.readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM Tasks", null)
+        Log.d(TAG, "*************************")
+        cursor.use {
+            while(it.moveToNext()) {
+                //全レコードのCycle throgh
+                with(cursor) {
+                    val id = getLong(0)
+                    val name = getString(1)
+                    val description = getString(2)
+                    val sortOrder = getString(3)
+                    val result = "ID: $id Name: $name description: $description sortOrder: $sortOrder"
+                    Log.d(TAG, "onCreate: 読み込みデータ $result")
+                }
+            }
+        }
+
+        Log.d(TAG, "*************************")
 
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
