@@ -4,6 +4,7 @@ import android.content.ContentProvider
 import android.content.ContentValues
 import android.content.UriMatcher
 import android.database.Cursor
+import android.database.sqlite.SQLiteQueryBuilder
 import android.net.Uri
 import android.util.Log
 
@@ -36,11 +37,26 @@ class AppProvider: ContentProvider() {
         Log.d(TAG, "buildUrlMatcher starts")
         val matcher = UriMatcher(UriMatcher.NO_MATCH)
 
+
+        // e.g
+        matcher.addURI(CONTENT_AUTHORITY, TasksContract.TABLE_NAME, TASKS)
+        matcher.addURI(CONTENT_AUTHORITY, "${TasksContract.TABLE_NAME}/#", TASKS_ID)
+        // e.g
+        // matcher.addURI(CONTENT_AUTHORITY, TimingsContract.TABLE_NAME, TIMINGS)
+        // matcher.addURI(CONTENT_AUTHORITY, "${TimingsContract.TABLE_NAME}/#", TIMINGS_ID)
+        // e.g
+        // matcher.addURI(CONTENT_AUTHORITY, DurationsContract.TABLE_NAME, TASK_DURATIONS)
+        // matcher.addURI(CONTENT_AUTHORITY, "${DurationsContract.TABLE_NAME}/#", TASK_DURATIONS_ID)
+
         return matcher
     }
 
+    override fun onCreate(): Boolean {
+        Log.d("onCreate: starts")
+        return true
+    }
 
-    override fun insert(uri: Uri, values: ContentValues?): Uri? {
+    override fun getType(uri: Uri): String {
         TODO("Not yet implemented")
     }
 
@@ -51,16 +67,50 @@ class AppProvider: ContentProvider() {
         selectionArgs: Array<out String>?,
         sortOrder: String?
     ): Cursor? {
-        TODO("Not yet implemented")
+        val match = uriMatcher.match(uri)
+        Log.d("query called with uri: $match")
+
+        val queryBuilder: SQLiteQueryBuilder = SQLiteQueryBuilder()
+
+        when(match) {
+            TASKS -> queryBuilder.tables = TasksContract.TABLE_NAME
+
+            TASKS_ID -> {
+                queryBuilder.tables = TasksContract.TABLE_NAME
+                val taskId = TasksContract.getId(uri)
+                queryBuilder.appendWhere("${TasksContract.Columns.ID} = $taskId" )
+
+            }
+
+//            TIMINGS -> queryBuilder.tables = TimingsContract.TABLE_NAME
+//
+//            TIMINGS_ID -> {
+//                queryBuilder.tables = TimingsContract.TABLE_NAME
+//                val timingId = TasksContract.getId(uri)
+//                queryBuilder.appendWhere("${TimingsContract.Columns.ID} = $timingId" )
+//
+//            }
+//
+//            TASK_DURATIONS -> queryBuilder.tables = DurationsContract.TABLE_NAME
+//
+//            TASK_DURATIONS_ID -> {
+//                queryBuilder.tables = DurationsContract.TABLE_NAME
+//                val taskDurationsId = DurationsContract.Contract.getId(uri)
+//                queryBuilder.appendWhere("${DurationsContract.Columns.ID} = $taskDurationsId" )
+//
+//            }
+
+            else -> throw IllegalArgumentException("Unknown URI: $uri")
+        }
     }
 
-    override fun onCreate(): Boolean {
+    override fun insert(uri: Uri, values: ContentValues): Uri {
         TODO("Not yet implemented")
     }
 
     override fun update(
         uri: Uri,
-        values: ContentValues?,
+        values: ContentValues,
         selection: String?,
         selectionArgs: Array<out String>?
     ): Int {
@@ -71,8 +121,6 @@ class AppProvider: ContentProvider() {
         TODO("Not yet implemented")
     }
 
-    override fun getType(uri: Uri): String? {
-        TODO("Not yet implemented")
-    }
+
 
 }
