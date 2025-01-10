@@ -4,6 +4,7 @@ import android.content.ContentProvider
 import android.content.ContentValues
 import android.content.UriMatcher
 import android.database.Cursor
+import android.database.SQLException
 import android.database.sqlite.SQLiteQueryBuilder
 import android.net.Uri
 import android.util.Log
@@ -78,9 +79,10 @@ class AppProvider: ContentProvider() {
         selection: String?,
         selectionArgs: Array<out String>?,
         sortOrder: String?
-    ): Cursor? {
+    ): Cursor {
+        Log.d(TAG,"query called with uri: $uri")
         val match = uriMatcher.match(uri)
-        Log.d(TAG,"query called with uri: $match")
+        Log.d(TAG,"query match is: $match")
 
         val queryBuilder: SQLiteQueryBuilder = SQLiteQueryBuilder()
 
@@ -124,9 +126,41 @@ class AppProvider: ContentProvider() {
 
     // ContentValuesがNullableだからオプショナルにしないとだめだった
     override fun insert(uri: Uri, values: ContentValues?): Uri {
+        Log.d(TAG,"query called with uri: $uri")
         val match = uriMatcher.match(uri)
-        Log.d(TAG,"onUpdate: $match")
-        TODO("Not yet implemented")
+        Log.d(TAG,"query match is: $match")
+
+        val recordId: Long
+        val returnUri: Uri
+
+        when (match) {
+            TASKS -> {
+                val db = AppDatabase.getInstance(context!!).writableDatabase
+                recordId = db.insert(TasksContract.TABLE_NAME, null, values)
+
+                if (recordId != -1L) {
+                    returnUri = TasksContract.buildUriFromId(recordId)
+                } else {
+                    throw SQLException("Failed to insert, Uri was $uri")
+                }
+            }
+
+            TIMINGS -> {
+                val db = AppDatabase.getInstance(context!!).writableDatabase
+                recordId = db.insert(TimingsContract.TABLE_NAME, null, values)
+
+                if (recordId != -1L) {
+                    returnUri = TimingsContract.buildUriFromId(recordId)
+                } else {
+                    throw SQLException("Failed to insert, Uri was $uri")
+                }
+            }
+
+            else -> throw IllegalArgumentException("Unknown URI: $uri")
+        }
+
+        Log.d(TAG, "Existing insert, returning $returnUri")
+        return returnUri
     }
 
     // ContentValuesがNullableだからオプショナルにしないとだめだった
