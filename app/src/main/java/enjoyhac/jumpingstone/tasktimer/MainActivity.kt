@@ -1,5 +1,6 @@
 package enjoyhac.jumpingstone.tasktimer
 
+import android.content.ContentValues
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
@@ -17,11 +18,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
 
+        testInsert()
+
+        val projection = arrayOf(TasksContract.Columns.TASK_NAME, TasksContract.Columns.TASK_SORT_ORDER)
+        val sortOrder = TasksContract.Columns.TASK_SORT_ORDER
+
         val cursor = contentResolver.query(
-            TasksContract.buildUriFromId(2),
+            TasksContract.CONTENT_URI,
             null,
             null,
-            null)
+            null,
+            sortOrder
+            )
 
         Log.d(TAG, "*************************")
         cursor!!.use {
@@ -60,5 +68,28 @@ class MainActivity : AppCompatActivity() {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun testInsert() {
+        val values = ContentValues().apply{
+            put(TasksContract.Columns.TASK_NAME, "New TASK 1")
+            put(TasksContract.Columns.TASK_DESCRIPTION, "Description 1")
+            put(TasksContract.Columns.TASK_SORT_ORDER, 2)
+        }
+
+        val uri = contentResolver.insert(TasksContract.CONTENT_URI, values)
+        Log.d(TAG, "新しい行 id (in uri) は $uri")
+        Log.d(TAG, "id (in uri) は ${TasksContract.getId(uri!!)}")
+    }
+
+    private fun testUpdate() {
+        val values = ContentValues().apply{
+            put(TasksContract.Columns.TASK_NAME, "Content Provider")
+            put(TasksContract.Columns.TASK_DESCRIPTION, "Record content providers videos")
+        }
+
+        val uri = contentResolver.insert(TasksContract.CONTENT_URI, values)
+        Log.d(TAG, "新しい行 id (in uri) は $uri")
+        Log.d(TAG, "id (in uri) は ${TasksContract.getId(uri!!)}")
     }
 }
