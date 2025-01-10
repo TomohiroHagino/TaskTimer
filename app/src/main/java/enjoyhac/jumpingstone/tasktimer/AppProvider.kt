@@ -42,8 +42,8 @@ class AppProvider: ContentProvider() {
         matcher.addURI(CONTENT_AUTHORITY, TasksContract.TABLE_NAME, TASKS)
         matcher.addURI(CONTENT_AUTHORITY, "${TasksContract.TABLE_NAME}/#", TASKS_ID)
         // e.g
-        // matcher.addURI(CONTENT_AUTHORITY, TimingsContract.TABLE_NAME, TIMINGS)
-        // matcher.addURI(CONTENT_AUTHORITY, "${TimingsContract.TABLE_NAME}/#", TIMINGS_ID)
+         matcher.addURI(CONTENT_AUTHORITY, TimingsContract.TABLE_NAME, TIMINGS)
+         matcher.addURI(CONTENT_AUTHORITY, "${TimingsContract.TABLE_NAME}/#", TIMINGS_ID)
         // e.g
         // matcher.addURI(CONTENT_AUTHORITY, DurationsContract.TABLE_NAME, TASK_DURATIONS)
         // matcher.addURI(CONTENT_AUTHORITY, "${DurationsContract.TABLE_NAME}/#", TASK_DURATIONS_ID)
@@ -57,7 +57,19 @@ class AppProvider: ContentProvider() {
     }
 
     override fun getType(uri: Uri): String {
-        TODO("Not yet implemented")
+        var match = uriMatcher.match(uri)
+        return when (match) {
+            TASKS -> TasksContract.CONTENT_TYPE
+            TASKS_ID -> TasksContract.CONTENT_ITEM_TYPE
+
+            TIMINGS -> TimingsContract.CONTENT_ITEM_TYPE
+            TIMINGS_ID -> TimingsContract.CONTENT_ITEM_TYPE
+
+            else -> throw IllegalArgumentException("unknown Uri: $uri")
+//
+//            TASK_DURATIONS -> DurationsContract.CONTENT_ITEM_TYPE
+//            TASK_DURATIONS_ID -> DurationsContract.CONTENT_ITEM_TYPE
+        }
     }
 
     override fun query(
@@ -82,14 +94,14 @@ class AppProvider: ContentProvider() {
 
             }
 
-//            TIMINGS -> queryBuilder.tables = TimingsContract.TABLE_NAME
-//
-//            TIMINGS_ID -> {
-//                queryBuilder.tables = TimingsContract.TABLE_NAME
-//                val timingId = TasksContract.getId(uri)
-//                queryBuilder.appendWhere("${TimingsContract.Columns.ID} = $timingId" )
-//
-//            }
+            TIMINGS -> queryBuilder.tables = TimingsContract.TABLE_NAME
+
+            TIMINGS_ID -> {
+                queryBuilder.tables = TimingsContract.TABLE_NAME
+                val timingId = TasksContract.getId(uri)
+                queryBuilder.appendWhere("${TimingsContract.Columns.ID} = $timingId" )
+
+            }
 //
 //            TASK_DURATIONS -> queryBuilder.tables = DurationsContract.TABLE_NAME
 //
