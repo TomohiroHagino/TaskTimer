@@ -78,7 +78,7 @@ class AppProvider: ContentProvider() {
             TASKS_ID -> {
                 queryBuilder.tables = TasksContract.TABLE_NAME
                 val taskId = TasksContract.getId(uri)
-                queryBuilder.appendWhere("${TasksContract.Columns.ID} = $taskId" )
+                queryBuilder.appendWhereEscapeString("$taskId" )
 
             }
 
