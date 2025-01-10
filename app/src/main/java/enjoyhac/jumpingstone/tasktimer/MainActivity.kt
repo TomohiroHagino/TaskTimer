@@ -18,7 +18,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
 
-        testInsert()
+//        testDelete()
+        testDeleteTwo()
 
         val projection = arrayOf(TasksContract.Columns.TASK_NAME, TasksContract.Columns.TASK_SORT_ORDER)
         val sortOrder = TasksContract.Columns.TASK_SORT_ORDER
@@ -91,5 +92,40 @@ class MainActivity : AppCompatActivity() {
         val uri = contentResolver.insert(TasksContract.CONTENT_URI, values)
         Log.d(TAG, "新しい行 id (in uri) は $uri")
         Log.d(TAG, "id (in uri) は ${TasksContract.getId(uri!!)}")
+    }
+
+    private fun testUpdateTwo() {
+        val values = ContentValues().apply{
+            put(TasksContract.Columns.TASK_SORT_ORDER, 999)
+            put(TasksContract.Columns.TASK_DESCRIPTION, "For deletion")
+        }
+
+        val selection = TasksContract.Columns.TASK_SORT_ORDER + " = ?"
+        val selectionArgs = arrayOf("99")
+//        val taskUri = TasksContract.buildUriFromId(4)
+        val rowsAffected = contentResolver.update(TasksContract.CONTENT_URI, values, selection, selectionArgs)
+        Log.d(TAG, "Number of rows updated is $rowsAffected")
+    }
+
+    private fun testDelete() {
+        val taskUri = TasksContract.buildUriFromId(4)
+        val rowsAffected = contentResolver.delete(TasksContract.CONTENT_URI, null, null)
+        Log.d(TAG, "Number of rows ${rowsAffected!!} は 削除されました。")
+    }
+
+    private fun testDeleteTwo() {
+        val values = ContentValues().apply{
+            put(TasksContract.Columns.TASK_SORT_ORDER, 999)
+            put(TasksContract.Columns.TASK_DESCRIPTION, "For deletion")
+        }
+
+        val selection = TasksContract.Columns.TASK_SORT_ORDER + " = ?"
+        val selectionArgs = arrayOf("999")
+//        val taskUri = TasksContract.buildUriFromId(4)
+        val rowsAffected = contentResolver.delete(TasksContract.CONTENT_URI,
+            selection,
+            selectionArgs)
+
+        Log.d(TAG, "Number of rows deleted is $rowsAffected")
     }
 }
