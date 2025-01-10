@@ -17,11 +17,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
 
-        var appDatabase = AppDatabase.getInstance(this)
-        val db = appDatabase.readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM Tasks", null)
+        val cursor = contentResolver.query(
+            TasksContract.buildUriFromId(2),
+            null,
+            null,
+            null)
+
         Log.d(TAG, "*************************")
-        cursor.use {
+        cursor!!.use {
             while(it.moveToNext()) {
                 //全レコードのCycle throgh
                 with(cursor) {
